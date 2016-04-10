@@ -1,0 +1,54 @@
+-
+  name: 'Node Root'
+  uriPattern: 'root'
+  defaults:
+    '@package':    'PackageFactory.FlowQueryAPI'
+    '@controller': 'Node'
+    '@action':     'root'
+    '@format':     'json'
+  appendExceedingArguments: TRUE
+  httpMethods: ['OPTIONS', 'GET']
+
+-
+  name: 'Node Show'
+  uriPattern: 'node'
+  defaults:
+    '@package':    'PackageFactory.FlowQueryAPI'
+    '@controller': 'Node'
+    '@action':     'show'
+    '@format':     'json'
+  appendExceedingArguments: TRUE
+  httpMethods: ['OPTIONS', 'GET']
+
+-
+  name: 'Node Children'
+  uriPattern: 'node/children'
+  defaults:
+    '@package':    'PackageFactory.FlowQueryAPI'
+    '@controller': 'Node'
+    '@action':     'children'
+    '@format':     'json'
+  appendExceedingArguments: TRUE
+  httpMethods: ['OPTIONS', 'GET']
+
+-
+  name: 'Node Parent'
+  uriPattern: 'node/parent'
+  defaults:
+    '@package':    'PackageFactory.FlowQueryAPI'
+    '@controller': 'Node'
+    '@action':     'parent'
+    '@format':     'json'
+  appendExceedingArguments: TRUE
+  httpMethods: ['OPTIONS', 'GET']
+
+-
+  name: 'Node Parents'
+  uriPattern: 'node/parents'
+  defaults:
+    '@package':    'PackageFactory.FlowQueryAPI'
+    '@controller': 'Node'
+    '@action':     'parents'
+    '@format':     'json'
+  appendExceedingArguments: TRUE
+  httpMethods: ['OPTIONS', 'GET']

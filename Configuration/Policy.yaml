@@ -1,0 +1,14 @@
+privilegeTargets:
+
+  'TYPO3\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+
+    'PackageFactory.FlowQueryAPI:AllActions':
+      matcher: 'method(PackageFactory\FlowQueryAPI\Controller\.*Controller->(.*)Action())'
+
+roles:
+
+  'TYPO3.Flow:Everybody':
+    privileges:
+      -
+        privilegeTarget: 'PackageFactory.FlowQueryAPI:AllActions'
+        permission: GRANT

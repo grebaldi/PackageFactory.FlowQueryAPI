@@ -64,7 +64,7 @@ class NodeService
 
         $contextProperties = $this->prepareContextProperties($workspaceName, $dimensions);
 
-        if ($site === null) {
+        if ($site === null && count(explode('/', $nodePath)) > 2) {
             list(,,$siteNodeName) = explode('/', $nodePath);
             $site = $this->siteRepository->findOneByNodeName($siteNodeName);
         }

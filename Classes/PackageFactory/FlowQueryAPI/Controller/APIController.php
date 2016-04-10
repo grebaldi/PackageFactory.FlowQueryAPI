@@ -1,9 +1,10 @@
 <?php
 namespace PackageFactory\FlowQueryAPI\Controller;
 
-use TYPO3\Flow\Mvc\View\JsonView:
+use TYPO3\Flow\Mvc\View\JsonView;
+use TYPO3\Flow\Mvc\Controller\ActionController;
 
-abstract class APIController
+abstract class APIController extends ActionController
 {
     /**
      * @var array

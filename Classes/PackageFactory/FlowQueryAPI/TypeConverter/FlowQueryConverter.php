@@ -3,16 +3,17 @@ namespace PackageFactory\FlowQueryAPI\TypeConverter;
 
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Property\TypeConverter\AbstractTypeConverter;
+use TYPO3\Flow\Property\PropertyMappingConfigurationInterface;
 use TYPO3\Eel\FlowQuery\FlowQuery;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 use PackageFactory\FlowQueryAPI\TYPO3CR\Service\NodeService;
 
 /**
- * An Object Converter for ChangeCollections.
+ * An Object Converter for FlowQuery.
  *
  * @Flow\Scope("singleton")
  */
-class FlowQueryTypeConverter extends AbstractTypeConverter
+class FlowQueryConverter extends AbstractTypeConverter
 {
     /**
      * @var array

@@ -1,6 +1,7 @@
 <?php
 namespace PackageFactory\FlowQueryAPI\Controller;
 
+use TYPO3\Flow\Annotations as Flow;
 use PackageFactory\FlowQueryAPI\Domain\Dto\NodeAddressInterface;
 use PackageFactory\FlowQueryAPI\Domain\Dto\NodeShape;
 use PackageFactory\FlowQueryAPI\TYPO3CR\Service\NodeService;
@@ -10,10 +11,27 @@ class NodeController extends APIController
     use \TYPO3\Neos\Controller\CreateContentContextTrait;
 
     /**
-     * @Flow\inject
+     * @Flow\Inject
      * @var NodeService
      */
     protected $nodeService;
+
+    protected function prepareResponse($resource)
+    {
+        if (is_array($resource)) {
+            $result = [];
+            foreach ($resource as $node) {
+                $result[] = $this->prepareResponse($node);
+            }
+
+            return $result;
+        }
+
+        $nodeShape = new NodeShape($resource);
+        $nodeShape->setControllerContext($this->controllerContext);
+
+        return $nodeShape;
+    }
 
     /**
      * @param string $workspaceName
@@ -25,7 +43,7 @@ class NodeController extends APIController
         $contentContext = $this->createContentContext($workspaceName, $dimensionvalues);
         $rootNode = $contentContext->getNode('/');
 
-        $this->view->assign('value', new NodeShape($rootNode));
+        $this->view->assign('value', $this->prepareResponse($rootNode));
     }
 
     /**
@@ -36,7 +54,7 @@ class NodeController extends APIController
     {
         $resolvedNode = $node->resolve();
 
-        $this->view->assign('value', new NodeShape($resolvedNode));
+        $this->view->assign('value', $this->prepareResponse($resolvedNode));
     }
 
     /**
@@ -47,9 +65,7 @@ class NodeController extends APIController
     {
         $resolvedNode = $node->resolve();
 
-        $this->view->assign('value', array_map(function($node) {
-            return new NodeShape($node);
-        }, $resolvedNode->children()));
+        $this->view->assign('value', $this->prepareResponse($resolvedNode->getChildNodes()));
     }
 
     /**
@@ -60,7 +76,7 @@ class NodeController extends APIController
     {
         $resolvedNode = $node->resolve();
 
-        $this->view->assign('value', new NodeShape($resolvedNode->getParent()));
+        $this->view->assign('value', $this->prepareResponse($resolvedNode->getParent()));
     }
 
     /**
@@ -77,9 +93,7 @@ class NodeController extends APIController
             $resolvedNode = $parent;
         }
 
-        $this->view->assign('value', array_map(function($node) {
-            return new NodeShape($node);
-        }, $parents);
+        $this->view->assign('value', $this->prepareResponse($parents));
     }
 
     /**
@@ -91,6 +105,6 @@ class NodeController extends APIController
         $resolvedNode = $node->resolve();
         $closestDocument = $this->nodeService->getClosestDocumentNode($resolvedNode);
 
-        $this->view->assign('value', new NodeShape($closestDocument));
+        $this->view->assign('value', $this->prepareResponse($closestDocument));
     }
 }

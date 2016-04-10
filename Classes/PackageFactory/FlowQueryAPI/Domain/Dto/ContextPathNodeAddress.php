@@ -1,7 +1,9 @@
 <?php
 namespace PackageFactory\FlowQueryAPI\Domain\Dto;
 
+use TYPO3\Flow\Annotations as Flow;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
+use PackageFactory\FlowQueryAPI\TYPO3CR\Service\NodeService;
 
 class ContextPathNodeAddress implements NodeAddressInterface
 {
@@ -11,11 +13,15 @@ class ContextPathNodeAddress implements NodeAddressInterface
     protected $contextPath;
 
     /**
-     * Set the context path
-     *
+     * @Flow\inject
+     * @var NodeService
+     */
+    protected $nodeService;
+
+    /**
      * @param string $contextPath
      */
-    public function setContextPath($contextPath)
+    public function __construct($contextPath)
     {
         $this->contextPath = $contextPath;
     }
@@ -29,6 +35,6 @@ class ContextPathNodeAddress implements NodeAddressInterface
             throw new \Exception('No context path set for ContextPathNodeAddress', 1460288474);
         }
 
-        return $this->nodeService->getNodeByContextPath($this->contextPath);
+        return $this->nodeService->getNodeFromContextPath($this->contextPath);
     }
 }

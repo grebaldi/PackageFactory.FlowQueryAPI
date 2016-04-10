@@ -1,8 +1,11 @@
 <?php
 namespace PackageFactory\FlowQueryAPI\Domain\Dto;
 
-use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
+use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Reflection\ObjectAccess;
+use TYPO3\Flow\Mvc\Controller\ControllerContext;
+use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
+use TYPO3\Neos\Service\LinkingService;
 
 class NodeShape implements \JsonSerializable
 {
@@ -12,11 +15,45 @@ class NodeShape implements \JsonSerializable
     protected $node;
 
     /**
+     * @Flow\Inject
+     * @var LinkingService
+     */
+    protected $linkingService;
+
+    /**
+     * @var ControllerContext
+     */
+    protected $controllerContext;
+
+    /**
      * @var array
      */
     protected $shapeDescription = [
-        '$included' => [],
-        '$excluded' => []
+        '$include' => null,
+        '$exclude' => null
+    ];
+
+    private static $allowedDirectNodeProperties = [
+        'name',
+        'label',
+        'fullLabel',
+        'nodeType',
+        'hidden',
+        'hiddenBeforeDateTime',
+        'hiddenAfterDateTime',
+        'hiddenInIndex',
+        'accessRoles',
+        'path',
+        'contextPath',
+        'depth',
+        'workspace',
+        'identifier',
+        'removed',
+        'visible',
+        'accessible',
+        // 'context',
+        'dimensions',
+        'autocreated'
     ];
 
     public function __construct(NodeInterface $node, array $shapeDescription = [])
@@ -30,18 +67,31 @@ class NodeShape implements \JsonSerializable
         $this->shapeDescription = array_merge_recursive($this->shapeDescription, $shapeDescription);
     }
 
+    public function setControllerContext(ControllerContext $controllerContext)
+    {
+        $this->controllerContext = $controllerContext;
+    }
+
     public function jsonSerialize()
     {
         $shape = [];
 
-        $topLevelPropertyNames = ObjectAccess::getGettablePropertyNames($this->node);
-        foreach ($topLevelPropertyNames as $propertyName) {
+        foreach (self::$allowedDirectNodeProperties as $propertyName) {
             if (
-                $propertyName != 'properties' &&
                 $this->isWhiteListed($propertyName, $this->shapeDescription['$include']) &&
                 !$this->isBlackListed($propertyName, $this->shapeDescription['$exclude'])
             ) {
-                $shape[$propertyName] = ObjectAccess::getProperty($node, $propertyName);
+                if ($propertyName === 'nodeType') {
+                    $shape[$propertyName] = $this->node->getNodeType()->getName();
+                    continue;
+                }
+
+                if ($propertyName === 'workspace') {
+                    $shape[$propertyName] = $this->node->getWorkspace()->getName();
+                    continue;
+                }
+
+                $shape[$propertyName] = ObjectAccess::getProperty($this->node, $propertyName);
             }
         }
 
@@ -84,10 +134,12 @@ class NodeShape implements \JsonSerializable
             }
         }
 
-        return $shape;
+        return [
+            static::class => $shape + $this->buildRelatedSection()
+        ];
     }
 
-    protected function recursivelySerializeNodeProperties($shape['properties'][$propertyName], $whiteList, $blackList)
+    protected function recursivelySerializeNodeProperties($propertyName, $whiteList, $blackList)
     {
         $result = [];
 
@@ -116,7 +168,7 @@ class NodeShape implements \JsonSerializable
             return true;
         }
 
-        return isset($shapeDescription[$propertyName]);
+        return $shapeDescription === '$include' || isset($shapeDescription[$propertyName]);
     }
 
     protected function isBlackListed($propertyName, $shapeDescription)
@@ -125,6 +177,62 @@ class NodeShape implements \JsonSerializable
             return false;
         }
 
-        return isset($shapeDescription[$propertyName]);
+        return $shapeDescription === '$exclude' || isset($shapeDescription[$propertyName]);
+    }
+
+    protected function buildRelatedSection()
+    {
+        if (
+            $this->controllerContext &&
+            $this->isWhiteListed('_links', $this->shapeDescription['$include']) &&
+            !$this->isBlackListed('_links', $this->shapeDescription['$exclude'])
+        ) {
+          return [
+              '_related' => [
+                  'self' => $this->buildRelation($this->node, $this->controllerContext),
+                  'parent' => $this->buildRelation($this->node->getParent()?:$this->node, $this->controllerContext),
+                  'children' => $this->buildRelations($this->node->getChildNodes(), $this->controllerContext)
+              ]
+          ];
+        }
+
+        return [];
+    }
+
+    protected function buildRelations($nodes, $controllerContext)
+    {
+        $result = [];
+
+        foreach ($nodes as $node) {
+            $result[] = $this->buildRelation($node, $controllerContext);
+        }
+
+        return $result;
+    }
+
+    protected function buildRelation(NodeInterface $node, $controllerContext)
+    {
+      $result = [
+          'contextPath' => $node->getContextPath(),
+          'nodeType' => $node->getNodeType()->getName(),
+          '_links' => []
+      ];
+
+      $request = $controllerContext->getRequest()->getMainRequest();
+
+      $uriBuilder = clone $controllerContext->getUriBuilder();
+      $uriBuilder->setRequest($request);
+      $result['_links']['service'] = $uriBuilder
+          ->reset()
+          ->setFormat($request->getFormat())
+          ->uriFor('show', array('node' => $node), 'Node', 'PackageFactory.FlowQueryAPI');
+
+      if (
+          $node->getNodeType()->isOfType('TYPO3.Neos:Document')
+      ) {
+          $result['_links']['frontend'] = $this->linkingService->createNodeUri($controllerContext, $node, null, 'html');
+      }
+
+      return $result;
     }
 }
