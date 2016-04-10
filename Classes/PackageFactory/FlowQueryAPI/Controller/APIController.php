@@ -17,16 +17,12 @@ abstract class APIController extends ActionController
     /**
      * @var array
      */
-    protected $supportedMediaTypes = array(
-        'application/json'
-    );
+    protected $supportedMediaTypes = ['application/json'];
 
     /**
      * @var array
      */
-    protected $viewFormatToObjectNameMap = array(
-        'json' => JsonView::class
-    );
+    protected $viewFormatToObjectNameMap = ['json' => JsonView::class];
 
     protected function prepareResponse($resource, $shape = [])
     {

@@ -27,12 +27,8 @@ final class Shape
             throw new \InvalidArgumentException('Shape must specify an alias', 1460300360);
         }
 
-        if (!isset($values['type'])) {
-            throw new \InvalidArgumentException('Shape must specify a type', 1460300378);
-        }
-
         $this->alias = $values['alias'];
-        $this->type = $values['type'];
+        $this->type = isset($values['type']) ? $values['type'] : null;
     }
 
     /**

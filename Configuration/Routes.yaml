@@ -64,3 +64,15 @@
     '@format':     'json'
   appendExceedingArguments: TRUE
   httpMethods: ['OPTIONS', 'GET']
+
+
+-
+  name: 'Commands'
+  uriPattern: 'dispatch'
+  defaults:
+    '@package':    'PackageFactory.FlowQueryAPI'
+    '@controller': 'Command'
+    '@action':     'dispatch'
+    '@format':     'json'
+  appendExceedingArguments: TRUE
+  httpMethods: ['POST']

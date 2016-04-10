@@ -5,6 +5,7 @@ use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Utility\TypeHandling;
 use TYPO3\Flow\Object\ObjectManagerInterface;
 use TYPO3\Flow\Reflection\ReflectionService;
+use TYPO3\Flow\Reflection\ObjectAccess;
 use TYPO3\Flow\Property\TypeConverter\AbstractTypeConverter;
 use TYPO3\Flow\Property\PropertyMappingConfigurationInterface;
 use PackageFactory\FlowQueryAPI\Annotations\Shape;
@@ -80,7 +81,7 @@ class WriteShapeConverter extends AbstractTypeConverter
     public function convertFrom(
         $source,
         $targetType,
-        array $subProperties = array(),
+        array $subProperties = [],
         PropertyMappingConfigurationInterface $configuration = null
     )
     {
@@ -88,7 +89,28 @@ class WriteShapeConverter extends AbstractTypeConverter
         $writeShapeAlias = $keys[0];
 
         if ($shapeClassName = $this->discoverShapeForAlias($writeShapeAlias)) {
-            $shape = $this->propertyMapper->convert($source, $shapeClassName, $configuration);
+            $shape = $this->objectManager->get($shapeClassName);
+            foreach ($source[$writeShapeAlias] as $key => $value) {
+                if (!ObjectAccess::isPropertySettable($shape, $key)) {
+                    throw new \Exception(
+                        sprintf('Property %s cannot be set in %s', $key, $shapeClassName),
+                        1460307960
+                    );
+                }
+
+                if (is_array($value) && $this->canConvertFrom($value, $targetType)) {
+                    ObjectAccess::setProperty($shape, $key, $this->convertFrom(
+                        $value,
+                        $targetType,
+                        $subProperties,
+                        $configuration
+                    ));
+
+                    continue;
+                }
+
+                ObjectAccess::setProperty($shape, $key, $value);
+            }
 
             if (!$shape) {
                 throw new \Exception(
