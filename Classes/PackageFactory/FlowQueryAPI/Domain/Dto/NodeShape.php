@@ -9,7 +9,7 @@ use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 use TYPO3\Neos\Service\LinkingService;
 
 /**
- * @FQAPI\ReadShape(
+ * @FQAPI\Shape(
  * 		alias="PackageFactory.FlowQueryAPI:Node",
  * 		type="TYPO3\TYPO3CR\Domain\Model\NodeInterface"
  * )
@@ -215,27 +215,27 @@ class NodeShape implements ReadShapeInterface
 
     protected function buildRelation(NodeInterface $node, $controllerContext)
     {
-      $result = [
-          'contextPath' => $node->getContextPath(),
-          'nodeType' => $node->getNodeType()->getName(),
-          '_links' => []
-      ];
+        $result = [
+            'contextPath' => $node->getContextPath(),
+            'nodeType' => $node->getNodeType()->getName(),
+            '_links' => []
+        ];
 
-      $request = $controllerContext->getRequest()->getMainRequest();
+        $request = $controllerContext->getRequest()->getMainRequest();
 
-      $uriBuilder = clone $controllerContext->getUriBuilder();
-      $uriBuilder->setRequest($request);
-      $result['_links']['service'] = $uriBuilder
-          ->reset()
-          ->setFormat($request->getFormat())
-          ->uriFor('show', array('node' => $node), 'Node', 'PackageFactory.FlowQueryAPI');
+        $uriBuilder = clone $controllerContext->getUriBuilder();
+        $uriBuilder->setRequest($request);
+        $result['_links']['service'] = $uriBuilder
+            ->reset()
+            ->setFormat($request->getFormat())
+            ->uriFor('show', array('node' => $node), 'Node', 'PackageFactory.FlowQueryAPI');
 
-      if (
-          $node->getNodeType()->isOfType('TYPO3.Neos:Document')
-      ) {
-          $result['_links']['frontend'] = $this->linkingService->createNodeUri($controllerContext, $node, null, 'html');
-      }
+        if (
+            $node->getNodeType()->isOfType('TYPO3.Neos:Document')
+        ) {
+            $result['_links']['frontend'] = $this->linkingService->createNodeUri($controllerContext, $node, null, 'html');
+        }
 
-      return $result;
+        return $result;
     }
 }

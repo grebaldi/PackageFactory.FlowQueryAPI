@@ -5,7 +5,7 @@ namespace PackageFactory\FlowQueryAPI\Annotations;
  * @Annotation
  * @Target("CLASS")
  */
-final class ReadShape
+final class Shape
 {
     /**
      * @var string
@@ -24,11 +24,11 @@ final class ReadShape
     public function __construct(array $values)
     {
         if (!isset($values['alias'])) {
-            throw new \InvalidArgumentException('ReadShape must specify an alias', 1460300360);
+            throw new \InvalidArgumentException('Shape must specify an alias', 1460300360);
         }
 
         if (!isset($values['type'])) {
-            throw new \InvalidArgumentException('ReadShape must specify a type', 1460300378);
+            throw new \InvalidArgumentException('Shape must specify a type', 1460300378);
         }
 
         $this->alias = $values['alias'];

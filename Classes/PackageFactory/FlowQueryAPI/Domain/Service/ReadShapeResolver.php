@@ -6,7 +6,7 @@ use TYPO3\Flow\Utility\TypeHandling;
 use TYPO3\Flow\Object\ObjectManagerInterface;
 use TYPO3\Flow\Reflection\ReflectionService;
 use TYPO3\Flow\Mvc\Controller\ControllerContext;
-use PackageFactory\FlowQueryAPI\Annotations\ReadShape;
+use PackageFactory\FlowQueryAPI\Annotations\Shape;
 use PackageFactory\FlowQueryAPI\Domain\Dto\ReadShapeInterface;
 
 /**
@@ -44,7 +44,7 @@ class ReadShapeResolver
         // Try to find a fitting ReadShape implementation for the given resource
         //
         if ($shapeClassName = $this->discoverShapeForResource($resource)) {
-            $readShapeAnnotation = $this->reflectionService->getClassAnnotation($shapeClassName, ReadShape::class);
+            $readShapeAnnotation = $this->reflectionService->getClassAnnotation($shapeClassName, Shape::class);
 
             $shape = $this->objectManager->get($shapeClassName, $resource, $shape);
 
@@ -76,11 +76,11 @@ class ReadShapeResolver
         );
 
         foreach ($readShapeClasses as $readShapeClass) {
-            $readShapeAnnotation = $this->reflectionService->getClassAnnotation($readShapeClass, ReadShape::class);
+            $readShapeAnnotation = $this->reflectionService->getClassAnnotation($readShapeClass, Shape::class);
 
             if (!$readShapeAnnotation) {
                 throw new \Exception(
-                    sprintf('Error in %s - ReadShapes need to have a ReadShape Annotation.', $readShapeClass),
+                    sprintf('Error in %s - ReadShapes need to have a Shape Annotation.', $readShapeClass),
                     1460302151
                 );
             }

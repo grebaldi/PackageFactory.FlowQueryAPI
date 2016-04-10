@@ -1,7 +1,8 @@
 <?php
 namespace PackageFactory\FlowQueryAPI\Domain\Command;
 
-interface CommandInterface
-{
+use PackageFactory\FlowQueryAPI\Domain\Dto\WriteShapeInterface;
 
+interface CommandInterface extends WriteShapeInterface
+{
 }
