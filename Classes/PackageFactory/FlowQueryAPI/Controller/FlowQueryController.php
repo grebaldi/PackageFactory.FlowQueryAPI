@@ -33,25 +33,4 @@ class FlowQueryController extends APIController
 
         $this->view->assign('value', $this->prepareResponse($result));
     }
-
-    protected function prepareResponse($resource) {
-        if (is_array($resource)) {
-            $result = [];
-
-            foreach ($resource as $singleResource) {
-                $result[] = $this->prepareResponse($singleResource);
-            }
-
-            return $result;
-        }
-
-        if ($resource instanceof NodeInterface) {
-            $shape = new NodeShape($resource);
-            $shape->setControllerContext($this->controllerContext);
-
-            return $shape;
-        }
-
-        return $resource;
-    }
 }

@@ -2,12 +2,19 @@
 namespace PackageFactory\FlowQueryAPI\Domain\Dto;
 
 use TYPO3\Flow\Annotations as Flow;
+use PackageFactory\FlowQueryAPI\Annotations as FQAPI;
 use TYPO3\Flow\Reflection\ObjectAccess;
 use TYPO3\Flow\Mvc\Controller\ControllerContext;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 use TYPO3\Neos\Service\LinkingService;
 
-class NodeShape implements \JsonSerializable
+/**
+ * @FQAPI\ReadShape(
+ * 		alias="PackageFactory.FlowQueryAPI:Node",
+ * 		type="TYPO3\TYPO3CR\Domain\Model\NodeInterface"
+ * )
+ */
+class NodeShape implements ReadShapeInterface
 {
     /**
      * @var NodeInterface
@@ -134,9 +141,7 @@ class NodeShape implements \JsonSerializable
             }
         }
 
-        return [
-            static::class => $shape + $this->buildRelatedSection()
-        ];
+        return ['_resource' => $shape] + $this->buildRelatedSection();
     }
 
     protected function recursivelySerializeNodeProperties($propertyName, $whiteList, $blackList)

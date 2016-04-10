@@ -16,23 +16,6 @@ class NodeController extends APIController
      */
     protected $nodeService;
 
-    protected function prepareResponse($resource)
-    {
-        if (is_array($resource)) {
-            $result = [];
-            foreach ($resource as $node) {
-                $result[] = $this->prepareResponse($node);
-            }
-
-            return $result;
-        }
-
-        $nodeShape = new NodeShape($resource);
-        $nodeShape->setControllerContext($this->controllerContext);
-
-        return $nodeShape;
-    }
-
     /**
      * @param string $workspaceName
      * @param array $dimensionvalues
