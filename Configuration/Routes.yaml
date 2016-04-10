@@ -52,3 +52,15 @@
     '@format':     'json'
   appendExceedingArguments: TRUE
   httpMethods: ['OPTIONS', 'GET']
+
+
+-
+  name: 'FlowQuery'
+  uriPattern: 'query'
+  defaults:
+    '@package':    'PackageFactory.FlowQueryAPI'
+    '@controller': 'FlowQuery'
+    '@action':     'query'
+    '@format':     'json'
+  appendExceedingArguments: TRUE
+  httpMethods: ['OPTIONS', 'GET']
