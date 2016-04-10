@@ -58,7 +58,6 @@ class NodeShape implements ReadShapeInterface
         'removed',
         'visible',
         'accessible',
-        // 'context',
         'dimensions',
         'autocreated'
     ];
@@ -111,8 +110,8 @@ class NodeShape implements ReadShapeInterface
 
             foreach ($propertyNames as $propertyName) {
                 if (
-                    $this->isWhiteListed($propertyName, $this->shapeDescription['$include']) &&
-                    !$this->isBlackListed($propertyName, $this->shapeDescription['$exclude'])
+                    $this->isWhiteListed($propertyName, $this->shapeDescription['$include']['properties']) &&
+                    !$this->isBlackListed($propertyName, $this->shapeDescription['$exclude']['properties'])
                 ) {
                     $property = $this->node->getProperty($propertyName);
 
@@ -156,14 +155,13 @@ class NodeShape implements ReadShapeInterface
                 if (is_array($value)) {
                     $result[$key] = $this->recursivelySerializeNodeProperties(
                         $value,
-                        isset($whiteList[$key]) ? $whiteList[$key] : [],
-                        isset($blackList[$key]) ? $blackList[$key] : []
+                        isset($whiteList[$key]) ? $whiteList[$key] : ($whiteList === '$include' ? $whiteList : []),
+                        isset($blackList[$key]) ? $blackList[$key] : ($blackList === '$exclude' ? $whiteList : [])
                     );
                 }
                 $result[$key] = $value;
             }
         }
-
         return $result;
     }
 
