@@ -49,10 +49,6 @@ class FlowQueryConverter extends AbstractTypeConverter
             return false;
         }
 
-        if (!isset($source['chain'])) {
-            return false;
-        }
-
         return true;
     }
 
@@ -69,7 +65,7 @@ class FlowQueryConverter extends AbstractTypeConverter
         $context = $this->determineContext($source['context']);
         $q = new FlowQuery(is_array($context) ? $context : [$context]);
 
-        return $this->buildQuery($source['chain'], $q);
+        return $this->buildQuery(isset($source['chain']) ? $source['chain'] : [], $q);
     }
 
     /**
@@ -85,6 +81,10 @@ class FlowQueryConverter extends AbstractTypeConverter
             }
 
             return $result;
+        }
+
+        if ($contextDescription === 'site') {
+            return $this->nodeService->getFirstSiteNode();
         }
 
         return $this->nodeService->getNodeFromContextPath($contextDescription);

@@ -90,6 +90,24 @@ class NodeService
     }
 
     /**
+     * Get the corresponding node for the first online site
+     *
+     * @return NodeInterface
+     */
+    public function getFirstSiteNode()
+    {
+        $site = $this->siteRepository->findFirstOnline();
+        $contextProperties = $this->prepareContextProperties('live', []);
+        $context = $this->contextFactory->create(
+            $contextProperties
+        );
+
+        $nodePath = sprintf('/sites/%s', $site->getNodeName());
+
+        return $context->getNode($nodePath);
+    }
+
+    /**
      * Prepares the context properties for the nodes based on the given workspace and dimensions
      *
      * @param string $workspaceName

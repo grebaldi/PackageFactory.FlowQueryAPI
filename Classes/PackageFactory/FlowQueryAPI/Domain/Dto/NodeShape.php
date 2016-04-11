@@ -9,12 +9,9 @@ use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 use TYPO3\Neos\Service\LinkingService;
 
 /**
- * @FQAPI\Shape(
- * 		alias="PackageFactory.FlowQueryAPI:Node",
- * 		type="TYPO3\TYPO3CR\Domain\Model\NodeInterface"
- * )
+ *
  */
-class NodeShape implements ReadShapeInterface
+class NodeShape implements \JsonSerializable
 {
     /**
      * @var NodeInterface
@@ -140,7 +137,7 @@ class NodeShape implements ReadShapeInterface
             }
         }
 
-        return ['_resource' => $shape] + $this->buildRelatedSection();
+        return $shape;
     }
 
     protected function recursivelySerializeNodeProperties($propertyName, $whiteList, $blackList)
@@ -181,61 +178,5 @@ class NodeShape implements ReadShapeInterface
         }
 
         return $shapeDescription === '$exclude' || isset($shapeDescription[$propertyName]);
-    }
-
-    protected function buildRelatedSection()
-    {
-        if (
-            $this->controllerContext &&
-            $this->isWhiteListed('_links', $this->shapeDescription['$include']) &&
-            !$this->isBlackListed('_links', $this->shapeDescription['$exclude'])
-        ) {
-          return [
-              '_related' => [
-                  'self' => $this->buildRelation($this->node, $this->controllerContext),
-                  'parent' => $this->buildRelation($this->node->getParent()?:$this->node, $this->controllerContext),
-                  'children' => $this->buildRelations($this->node->getChildNodes(), $this->controllerContext)
-              ]
-          ];
-        }
-
-        return [];
-    }
-
-    protected function buildRelations($nodes, $controllerContext)
-    {
-        $result = [];
-
-        foreach ($nodes as $node) {
-            $result[] = $this->buildRelation($node, $controllerContext);
-        }
-
-        return $result;
-    }
-
-    protected function buildRelation(NodeInterface $node, $controllerContext)
-    {
-        $result = [
-            'contextPath' => $node->getContextPath(),
-            'nodeType' => $node->getNodeType()->getName(),
-            '_links' => []
-        ];
-
-        $request = $controllerContext->getRequest()->getMainRequest();
-
-        $uriBuilder = clone $controllerContext->getUriBuilder();
-        $uriBuilder->setRequest($request);
-        $result['_links']['service'] = $uriBuilder
-            ->reset()
-            ->setFormat($request->getFormat())
-            ->uriFor('show', array('node' => $node), 'Node', 'PackageFactory.FlowQueryAPI');
-
-        if (
-            $node->getNodeType()->isOfType('TYPO3.Neos:Document')
-        ) {
-            $result['_links']['frontend'] = $this->linkingService->createNodeUri($controllerContext, $node, null, 'html');
-        }
-
-        return $result;
     }
 }

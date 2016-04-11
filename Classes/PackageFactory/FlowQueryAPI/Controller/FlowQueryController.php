@@ -31,6 +31,12 @@ class FlowQueryController extends APIController
                 throw new \Exception(sprintf('%s is not allowed as a finisher.', $finisher), 1460298033);
         }
 
-        $this->view->assign('value', $this->prepareResponse($result));
+        $this->view->assign('value', array_map(function($value) {
+            if ($value instanceof NodeInterface) {
+                return new NodeShape($value);
+            }
+
+            return $value;
+        }, is_array($result) ? $result : [$result]));
     }
 }
