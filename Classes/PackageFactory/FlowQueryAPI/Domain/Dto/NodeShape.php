@@ -177,6 +177,9 @@ class NodeShape implements \JsonSerializable
             return false;
         }
 
-        return $shapeDescription === '$exclude' || isset($shapeDescription[$propertyName]);
+        return $shapeDescription === '$exclude' || (
+            isset($shapeDescription[$propertyName]) &&
+            $shapeDescription[$propertyName] === $propertyName
+        );
     }
 }

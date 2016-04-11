@@ -136,6 +136,14 @@ class FlowQueryConverter extends AbstractTypeConverter
                 $q = $filter ? $q->find($filter) : $q->find();
                 break;
 
+            case 'shape':
+                if ($shape = $operationDescription['shape']) {
+                    $q = $q->shape($shape);
+                    break;
+                }
+
+                throw new \Exception('No shape argument for FlowQuery shape operation provided.', 1460394822);
+
             default:
                 throw new \Exception(
                     sprintf('FlowQuery operation %s is not allowed here', $operationDescription['type']), 1460285096);
