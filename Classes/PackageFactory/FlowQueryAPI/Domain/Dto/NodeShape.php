@@ -25,11 +25,6 @@ class NodeShape implements \JsonSerializable
     protected $linkingService;
 
     /**
-     * @var ControllerContext
-     */
-    protected $controllerContext;
-
-    /**
      * @var array
      */
     protected $shapeDescription = [
@@ -68,11 +63,6 @@ class NodeShape implements \JsonSerializable
     public function mergeShapeDescription(array $shapeDescription)
     {
         $this->shapeDescription = array_merge_recursive($this->shapeDescription, $shapeDescription);
-    }
-
-    public function setControllerContext(ControllerContext $controllerContext)
-    {
-        $this->controllerContext = $controllerContext;
     }
 
     public function jsonSerialize()
