@@ -13,6 +13,8 @@ use TYPO3\Neos\Service\LinkingService;
  */
 class NodeShape implements \JsonSerializable
 {
+    const INCLUDE_BRANCH = 1461168043;
+
     /**
      * @var NodeInterface
      */
@@ -27,10 +29,7 @@ class NodeShape implements \JsonSerializable
     /**
      * @var array
      */
-    protected $shapeDescription = [
-        '$include' => null,
-        '$exclude' => null
-    ];
+    protected $shapeDescription = self::INCLUDE_BRANCH;
 
     private static $allowedDirectNodeProperties = [
         'name',
@@ -51,7 +50,8 @@ class NodeShape implements \JsonSerializable
         'visible',
         'accessible',
         'dimensions',
-        'autocreated'
+        'autocreated',
+        'properties'
     ];
 
     public function __construct(NodeInterface $node, array $shapeDescription = [])
@@ -62,114 +62,91 @@ class NodeShape implements \JsonSerializable
 
     public function mergeShapeDescription(array $shapeDescription)
     {
+        if (!is_array($this->shapeDescription)) {
+            $this->shapeDescription = $shapeDescription;
+            return;
+        }
         $this->shapeDescription = array_merge_recursive($this->shapeDescription, $shapeDescription);
     }
 
-    public function jsonSerialize()
+    protected function buildNodeArray()
     {
         $shape = [];
 
+        //
+        // Serialize direct properties
+        //
         foreach (self::$allowedDirectNodeProperties as $propertyName) {
-            if (
-                $this->isWhiteListed($propertyName, $this->shapeDescription['$include']) &&
-                !$this->isBlackListed($propertyName, $this->shapeDescription['$exclude'])
-            ) {
-                if ($propertyName === 'nodeType') {
-                    $shape[$propertyName] = $this->node->getNodeType()->getName();
-                    continue;
-                }
 
-                if ($propertyName === 'workspace') {
-                    $shape[$propertyName] = $this->node->getWorkspace()->getName();
-                    continue;
-                }
-
-                $shape[$propertyName] = ObjectAccess::getProperty($this->node, $propertyName);
+            //
+            // For the node type, just return the name
+            //
+            if ($propertyName === 'nodeType') {
+                $shape[$propertyName] = $this->node->getNodeType()->getName();
+                continue;
             }
+
+            //
+            // For the workspace, just return the name
+            //
+            if ($propertyName === 'workspace') {
+                $shape[$propertyName] = $this->node->getWorkspace()->getName();
+                continue;
+            }
+
+            //
+            // For everything else, use the direct property value
+            //
+            $shape[$propertyName] = ObjectAccess::getProperty($this->node, $propertyName);
         }
 
-        if (
-            $this->isWhiteListed('properties', $this->shapeDescription['$include']) &&
-            !$this->isBlackListed('properties', $this->shapeDescription['$exclude'])
-        ) {
-            $propertyNames = $this->node->getPropertyNames();
-            $shape['properties'] = [];
+        return $shape;
+    }
 
-            foreach ($propertyNames as $propertyName) {
-                if (
-                    $this->isWhiteListed($propertyName, $this->shapeDescription['$include']['properties']) &&
-                    !$this->isBlackListed($propertyName, $this->shapeDescription['$exclude']['properties'])
-                ) {
-                    $property = $this->node->getProperty($propertyName);
+    protected function reduceNodeArray($nodeArray, $shapeDescription)
+    {
+        $shape = [];
 
-                    if (is_array($property)) {
-                        $shape['properties'][$propertyName] = $this->recursivelySerializeNodeProperties(
-                            $property,
+        foreach ($nodeArray as $key => $value) {
+            if (
+                $shapeDescription === self::INCLUDE_BRANCH ||
+                array_key_exists($key, $shapeDescription)
+            ) {
+                //
+                // If the value is an array, build the next shape description and resolve it
+                // recursively
+                //
+                if (is_array($value)) {
 
-                            //
-                            // Pass the whitelist, if existent - an empty array otherwise
-                            //
-                            isset($this->shapeDescription['$include']['properties']) &&
-                            isset($this->shapeDescription['$include']['properties'][$propertyName]) ?
-                            $this->shapeDescription['$include']['properties'][$propertyName] : [],
-
-                            //
-                            // Pass the blacklist, if existent - an empty array otherwise
-                            //
-                            isset($this->shapeDescription['$exclude']['properties']) &&
-                            isset($this->shapeDescription['$exclude']['properties'][$propertyName]) ?
-                            $this->shapeDescription['$exclude']['properties'][$propertyName] : []
-                        );
+                    if ($shapeDescription === self::INCLUDE_BRANCH) {
+                        //
+                        // If we're in a branch that is included entirely, just keep it that way
+                        //
+                        $nextShapeDescription = $shapeDescription;
+                    } else {
+                        //
+                        // If there's an include rule for the current property, we need to figure out,
+                        // whether the shape has more depth at this point, or we need to include the entire
+                        // branch
+                        //
+                        $nextShapeDescription = $shapeDescription[$key] === $key ?
+                            self::INCLUDE_BRANCH : $shapeDescription[$key];
                     }
 
-                    $shape['properties'][$propertyName] = $property;
+                    $shape[$key] = $this->reduceNodeArray($value, $nextShapeDescription);
+                    continue;
                 }
+
+                $shape[$key] = $value;
             }
         }
 
         return $shape;
     }
 
-    protected function recursivelySerializeNodeProperties($propertyName, $whiteList, $blackList)
+    public function jsonSerialize()
     {
-        $result = [];
-
-        foreach ($properties as $key => $value) {
-            if (
-                $this->isWhiteListed($key, $whiteList) &&
-                !$this->isBlackListed($key, $blackList)
-            ) {
-                if (is_array($value)) {
-                    $result[$key] = $this->recursivelySerializeNodeProperties(
-                        $value,
-                        isset($whiteList[$key]) ? $whiteList[$key] : ($whiteList === '$include' ? $whiteList : []),
-                        isset($blackList[$key]) ? $blackList[$key] : ($blackList === '$exclude' ? $whiteList : [])
-                    );
-                }
-                $result[$key] = $value;
-            }
-        }
-        return $result;
-    }
-
-    protected function isWhiteListed($propertyName, $shapeDescription)
-    {
-        if (!isset($this->shapeDescription['$include'])) {
-            return true;
-        }
-
-        return $shapeDescription === '$include' || isset($shapeDescription[$propertyName]);
-    }
-
-    protected function isBlackListed($propertyName, $shapeDescription)
-    {
-        if (!isset($this->shapeDescription['$exclude'])) {
-            return false;
-        }
-
-        return $shapeDescription === '$exclude' || (
-            isset($shapeDescription[$propertyName]) &&
-            $shapeDescription[$propertyName] === $propertyName
-        );
+        $shape = $this->buildNodeArray();
+        return $this->reduceNodeArray($shape, $this->shapeDescription);
     }
 }
