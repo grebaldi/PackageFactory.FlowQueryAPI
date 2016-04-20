@@ -6,6 +6,7 @@ import find from './find';
 import get from './get';
 import parent from './parent';
 import parents from './parents';
+import property from './property';
 import shape from './shape';
 
 export const operations = {
@@ -17,5 +18,6 @@ export const operations = {
     get,
     parent,
     parents,
+    property,
     shape
 };
