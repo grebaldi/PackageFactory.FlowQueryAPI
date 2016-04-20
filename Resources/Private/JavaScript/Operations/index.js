@@ -5,6 +5,7 @@ import find from './find';
 import get from './get';
 import parent from './parent';
 import parents from './parents';
+import shape from './shape';
 
 export const operations = {
     children,
@@ -13,5 +14,6 @@ export const operations = {
     find,
     get,
     parent,
-    parents
+    parents,
+    shape
 };
