@@ -1,9 +1,9 @@
 //
-// FlowQuery `find` operation
+// FlowQuery `filter` operation
 //
 export default (configuration, request) => filter => forward => {
     request.chain.push({
-        type: 'find',
+        type: 'filter',
         filter
     });
 

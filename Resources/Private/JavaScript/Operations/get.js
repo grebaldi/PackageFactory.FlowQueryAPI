@@ -1,5 +1,5 @@
 //
-// get FlowQuery operation
+// FlowQuery `get` operation
 //
 export default (configuration, request) => index => (forward, dispatch) => {
     request.finisher = 'get';
