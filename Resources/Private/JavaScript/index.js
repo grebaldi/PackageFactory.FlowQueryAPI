@@ -1,7 +1,5 @@
 import createFlowQueryAPI from './api';
 
-const {q} = createFlowQueryAPI({
+export default createFlowQueryAPI({
 
 });
-
-export default q;

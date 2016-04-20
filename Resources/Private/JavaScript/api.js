@@ -2,21 +2,24 @@ import {
 	normalizeContextItem
 } from './Utils/index';
 
-import * as operations from './Operationss//index';
+import {operations} from './Operations/index';
 
-const dispatch = request => {
-	
+const createDispatch = configuration => request => {
+	// validate the request
+	// send it to the server
+	// convert the response
+	// handle errors
+	console.log(request);
 };
 
-const initializeChainedInterface = (configuration, request) => Object.keys(operations)
-.reduce(
-	(operationName, chainedInterface) => {
+const initializeChainedInterface = (configuration, request) => Object.keys(operations).reduce(
+	(chainedInterface, operationName) => {
 		const operation = operations[operationName](configuration, request);
 		chainedInterface[operationName] = (...args) => {
-			const rechain = operation(..args);
+			const rechain = operation(...args);
 			return rechain(
 				request => initializeChainedInterface(configuration, request),
-				dispatch
+				createDispatch(configuration)
 			);
 		};
 
@@ -25,16 +28,16 @@ const initializeChainedInterface = (configuration, request) => Object.keys(opera
 	{}
 );
 
-export default createFlowQueryAPI = configuration => {
+export default configuration => {
 	const q = (context) => {
 		if (!Array.isArray()) {
 			context = [context];
 		}
 
-		return {
+		return initializeChainedInterface(configuration, {
 			context: context.map(normalizeContextItem),
 			chain: []
-		};
+		});
 	};
 
 	return {q};

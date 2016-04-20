@@ -1,7 +1,7 @@
 import babel from 'rollup-plugin-babel';
 
 export default {
-    moduleName: 'flow-query-api',
+    moduleName: 'neos',
     entry: 'Resources/Private/JavaScript/index.js',
     plugins: [babel()],
     format: 'umd',
