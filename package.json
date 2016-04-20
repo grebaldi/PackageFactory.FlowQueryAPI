@@ -6,6 +6,7 @@
   "scripts": {
     "pretest": "rollup -c Build/Rollup/config.test.js",
     "build": "rollup -c Build/Rollup/config.build.js",
+     "watch": "./node_modules/.bin/watch \"npm run build\" Resources/Private/JavaScript/",
     "test": "mocha Build/Mocha/bundle.js"
   },
   "repository": {

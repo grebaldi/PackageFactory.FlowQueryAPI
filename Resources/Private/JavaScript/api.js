@@ -5,7 +5,7 @@ import {
 import {operations} from './Operations/index';
 
 const createDispatch = configuration => request => {
-	fetch(configuration.endpoints.query, {
+	return fetch(configuration.endpoints.query, {
 		method: 'POST',
 		body: JSON.stringify({
 			q: request,
@@ -16,8 +16,7 @@ const createDispatch = configuration => request => {
 			'Content-Type': 'application/json'
 		}
 	})
-	.then(res => res.json())
-	.then(res => console.log(res));
+	.then(res => res.json());
 };
 
 const initializeChainedInterface = (configuration, request) => Object.keys(operations).reduce(
