@@ -5,11 +5,19 @@ import {
 import {operations} from './Operations/index';
 
 const createDispatch = configuration => request => {
-	// validate the request
-	// send it to the server
-	// convert the response
-	// handle errors
-	console.log(request);
+	fetch(configuration.endpoints.query, {
+		method: 'POST',
+		body: JSON.stringify({
+			q: request,
+			finisher: request.finisher,
+			finisherArguments: request.finisherArguments
+		}),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	})
+	.then(res => res.json())
+	.then(res => console.log(res));
 };
 
 const initializeChainedInterface = (configuration, request) => Object.keys(operations).reduce(
