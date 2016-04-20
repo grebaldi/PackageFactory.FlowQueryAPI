@@ -1,7 +1,7 @@
 //
 // FlowQuery `parent` operation
 //
-export default (configuration, request) => filter => forward => {
+export default (configuration, request) => () => forward => {
     request.chain.push({
         type: 'parent'
     });
