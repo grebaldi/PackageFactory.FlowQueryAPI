@@ -9,6 +9,17 @@ npm install
 npm run build
 ```
 
+## Include routes in `Configuration/Routes.yaml`:
+
+```
+-
+  name: 'FlowQuery'
+  uriPattern: '<FlowQueryAPISubroutes>'
+  subRoutes:
+    'FlowQueryAPISubroutes':
+      package: 'PackageFactory.FlowQueryAPI'
+```
+
 ## Include
 
 ```html
