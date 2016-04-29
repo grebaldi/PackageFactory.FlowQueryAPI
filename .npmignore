@@ -1,0 +1,8 @@
+Build/
+Classes/
+Configuration/
+Meta/
+node_modules/
+Tests/
+.editorconfig
+composer.json
